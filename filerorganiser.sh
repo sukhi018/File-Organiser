@@ -27,6 +27,16 @@ fi
 if [[ ! -d "$path" ]];then
     echo "Path not found!"; exit 1
 fi
+exclude=(
+    images documents spreadsheets scripts archives
+    presentations audio video anyelse
+)
+
+exclude_exp=()
+for d in "${exclude[@]}"; do
+    exclude_exp+=( -name "$d" -o )
+done
+unset 'exclude_exp[-1]'
 
 # need to find files based on the order i want to
 # .jpg, .jpeg, .png - images
@@ -38,15 +48,15 @@ fi
 # .mp3 - audio mp3
 # .mp4 - video mp4
 # Anything else - to anyelse folder
-readarray -t images < <( find "$path" -type f -regextype egrep -iregex ".*\.(jpg|jpeg|png)$" )
-readarray -t documents < <( find "$path" -type f -regextype egrep -iregex ".*\.(doc|docx|txt|pdf)$" )
-readarray -t spreadsheets < <( find "$path" -type f -regextype egrep -iregex ".*\.(xls|xlsx|csv)$" )
-readarray -t scripts < <( find "$path" -type f -regextype egrep -iregex ".*\.sh$" )
-readarray -t archives < <( find "$path" -type f -regextype egrep -iregex ".*\.(zip|tar\.gz|tar\.bz2|tar)$" )
-readarray -t presentations < <( find "$path" -type f -regextype egrep -iregex ".*\.(ppt|pptx)$" )
-readarray -t audio < <( find "$path" -type f -regextype egrep -iregex ".*\.mp3$" )
-readarray -t video < <( find "$path" -type f -regextype egrep -iregex ".*\.mp4$" )
-readarray -t anyelse < <( find "$path" -type f -regextype egrep -not -iregex ".*\.(jpg|jpeg|png|doc|docx|txt|pdf|xls|xlsx|csv|sh|zip|tar\.gz|tar\.bz2|tar|ppt|pptx|mp3|mp4)$" )
+readarray -t images < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -iregex ".*\.(jpg|jpeg|png)$" )
+readarray -t documents < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -iregex ".*\.(doc|docx|txt|pdf)$" )
+readarray -t spreadsheets < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -iregex ".*\.(xls|xlsx|csv)$" )
+readarray -t scripts < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -iregex ".*\.sh$" )
+readarray -t archives < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -iregex ".*\.(zip|tar\.gz|tar\.bz2|tar)$" )
+readarray -t presentations < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -iregex ".*\.(ppt|pptx)$" )
+readarray -t audio < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -iregex ".*\.mp3$" )
+readarray -t video < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -iregex ".*\.mp4$" )
+readarray -t anyelse < <( find "$path" \( "${exclude_exp[@]}" \) -prune -o -type f -regextype egrep -not -iregex ".*\.(jpg|jpeg|png|doc|docx|txt|pdf|xls|xlsx|csv|sh|zip|tar\.gz|tar\.bz2|tar|ppt|pptx|mp3|mp4)$" )
 
 for folder in "images" "documents" "spreadsheets" "scripts" "archives" "presentations" "audio" "video" "anyelse"; do
     declare -n files="$folder"
